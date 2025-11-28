@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+motor
+pymongo
+PyJWT
+passlib[argon2]
+python-dotenv
+PySide6
+requests
+websockets
+asyncio
+starlette
+python-jose
+httpx

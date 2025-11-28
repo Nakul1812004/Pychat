@@ -1,0 +1,89 @@
+# =========================
+# PYTHON
+# =========================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pkl
+*.pyc
+
+# Virtual environment
+venv/
+env/
+ENV/
+.venv/
+
+# Jupyter / cache
+.ipynb_checkpoints/
+*.sqlite3
+
+# =========================
+# FASTAPI / BACKEND
+# =========================
+# pycache inside backend
+backend/__pycache__/
+backend/**/*.pyc
+
+# environment variables
+.env
+.env.*
+*.env
+
+# compiled bytecode
+backend/**/*.pyc
+
+# log files
+logs/
+*.log
+
+# =========================
+# FRONTEND (PySide6)
+# =========================
+frontend/__pycache__/
+frontend/**/*.pyc
+
+# pyinstaller-built executables
+dist/
+build/
+*.spec
+
+# Qt UI cache
+*.qrc
+*.qmlc
+*.qmltypes
+*.qmlproject.user
+*.qtl
+
+# images cache
+frontend/assets/icons/*.cache
+
+# =========================
+# SYSTEM / OS FILES
+# =========================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+
+# =========================
+# EDITOR / IDE FILES
+# =========================
+.vscode/
+.idea/
+*.iml
+
+# =========================
+# OTHER
+# =========================
+*.bak
+*.tmp
+*.temp
