@@ -3,3 +3,16 @@ venv/
 __pycache__/
 *.pyc
 .env
+backend/.env
+frontend/.env
+.idea/  
+.DS_Store
+node_modules/
+dist/
+build/
+coverage/
+*.log
+*.bak
+*.tmp
+*.swp
+*.swo
