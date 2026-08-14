@@ -12,25 +12,16 @@ import uuid, random, string, time
 router = APIRouter()
 
 
-# -------------------------------------------------------------------
-# INTERNAL: safe WebSocket sender (avoids circular imports)
-# -------------------------------------------------------------------
 async def send_ws(username: str, payload: dict):
-    """Lazy-import ws_send to avoid circular import"""
+
     from backend.routes.websocket import ws_send
     await ws_send(username, payload)
 
 
-# -------------------------------------------------------------------
-#   Utility: generate referral ID
-# -------------------------------------------------------------------
 def generate_referral_id(length: int = 6):
     return ''.join(random.choices(string.ascii_uppercase + string.digits, k=length))
 
 
-# -------------------------------------------------------------------
-#   SIGNUP
-# -------------------------------------------------------------------
 @router.post("/signup", response_model=UserResponse)
 async def signup(user: UserCreate, db=Depends(get_db)):
     if db is None:
@@ -59,9 +50,6 @@ async def signup(user: UserCreate, db=Depends(get_db)):
     }
 
 
-# -------------------------------------------------------------------
-#   LOGIN
-# -------------------------------------------------------------------
 @router.post("/login")
 async def login(user: UserLogin, db=Depends(get_db)):
     db_user = await db.users.find_one({"username": user.username})
@@ -80,9 +68,6 @@ async def login(user: UserLogin, db=Depends(get_db)):
     }
 
 
-# -------------------------------------------------------------------
-#   ADD FRIEND (real-time)
-# -------------------------------------------------------------------
 @router.post("/add_friend")
 async def add_friend(referral_id: str, token: str):
     db = await get_db()
@@ -124,9 +109,6 @@ async def add_friend(referral_id: str, token: str):
     return {"message": f"Friend request sent to {receiver_username}"}
 
 
-# -------------------------------------------------------------------
-#   GET NOTIFICATIONS
-# -------------------------------------------------------------------
 @router.get("/notifications")
 async def get_notifications(token: str):
     db = await get_db()
@@ -139,9 +121,6 @@ async def get_notifications(token: str):
     return user.get("notifications", [])
 
 
-# -------------------------------------------------------------------
-#   ACCEPT FRIEND REQUEST  (real-time)
-# -------------------------------------------------------------------
 @router.post("/accept_friend")
 async def accept_friend(sender: str, token: str, db=Depends(get_db)):
     user_data = decode_token(token)
@@ -183,9 +162,6 @@ async def accept_friend(sender: str, token: str, db=Depends(get_db)):
     return {"message": "Friend added successfully"}
 
 
-# -------------------------------------------------------------------
-#   GET USER PROFILE
-# -------------------------------------------------------------------
 @router.get("/me")
 async def get_me(token: str, db=Depends(get_db)):
     user_data = decode_token(token)

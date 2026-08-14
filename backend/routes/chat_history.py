@@ -12,7 +12,6 @@ async def get_private_history(
     token: str = Query(...),
     db=Depends(get_db)
 ):
-    """Load private chat history between two users"""
 
     # Check auth
     user_data = decode_token(token)

@@ -10,8 +10,7 @@ import subprocess
 import os
 import time
 
-from shared.config import get_base_url  # <-- NEW (ngrok supported)
-
+import shared.config 
 
 class AIChatWindow(QWidget):
     def __init__(self, user_data):
@@ -23,12 +22,12 @@ class AIChatWindow(QWidget):
         self.setWindowTitle("🤖 Chat with Grok AI")
         self.resize(500, 500)
 
-        # Get backend base URL (supports localhost + ngrok)
-        BASE_URL = get_base_url()
+
+        BASE_URL = shared.config.get_base_url()
         self.api_chat = f"{BASE_URL}/ai/chat"
         self.api_history = f"{BASE_URL}/ai/history"
 
-        # ---------------- UI ----------------
+        #  UI
         main_layout = QVBoxLayout()
         label = QLabel("🧠 Grok AI Assistant")
         label.setAlignment(Qt.AlignCenter)
@@ -51,24 +50,19 @@ class AIChatWindow(QWidget):
         main_layout.addLayout(input_layout)
         self.setLayout(main_layout)
 
-        # Load history
+
         self.load_history()
 
-    # ==========================================================
-    # Timestamp helper
-    # ==========================================================
+
     def now(self):
         return time.strftime("%Y-%m-%d %H:%M:%S")
 
-    # ==========================================================
-    # System Command Executor (Windows + Mac)
-    # ==========================================================
     def execute_command(self, text: str) -> bool:
         text = text.lower()
         system = platform.system().lower()
 
         try:
-            # ---------------- WINDOWS ----------------
+
             if system == "windows":
                 commands = {
                     "chrome": "chrome",
@@ -90,7 +84,7 @@ class AIChatWindow(QWidget):
 
                 return False
 
-            # ---------------- MAC ----------------
+
             elif system == "darwin":
                 mac_commands = {
                     "chrome": ["open", "-a", "Google Chrome"],
@@ -112,9 +106,7 @@ class AIChatWindow(QWidget):
             self.chat_display.append(f"[{self.now()}] ⚠ System Error: {str(e)}")
             return False
 
-    # ==========================================================
-    # Load AI chat history
-    # ==========================================================
+
     def load_history(self):
         try:
             resp = requests.get(self.api_history, params={"username": self.username}, timeout=6)
@@ -136,9 +128,7 @@ class AIChatWindow(QWidget):
         except Exception as e:
             self.chat_display.append(f"[{self.now()}] ⚠ History error: {e}")
 
-    # ==========================================================
-    # Send message to AI
-    # ==========================================================
+
     def send_to_ai(self):
         user_msg = self.input_box.text().strip()
         if not user_msg:
@@ -148,12 +138,12 @@ class AIChatWindow(QWidget):
         self.chat_display.append(f"[{ts}] 🟦 You: {user_msg}")
         self.input_box.clear()
 
-        # Try executing system command first
+
         if self.execute_command(user_msg):
             self.chat_display.append(f"[System] ✔ Command executed.")
             return
 
-        # Send to backend AI
+
         payload = {
             "username": self.username,
             "message": user_msg,

@@ -5,17 +5,12 @@ from PySide6.QtWidgets import (
 )
 import requests
 import time
-import json
+
 
 from shared.config import get_base_url
 
 
 class ChatWindow(QWidget):
-    """
-    Clean chat window.
-    NO WebSocket here.
-    All WebSocket communications go through MainWindow.
-    """
 
     def __init__(self, user_data, receiver, send_callback):
         super().__init__()
@@ -23,12 +18,11 @@ class ChatWindow(QWidget):
         self.user_data = user_data
         self.username = user_data["username"]
         self.receiver = receiver
-        self.send_callback = send_callback  # <---- MainWindow WS sender
+        self.send_callback = send_callback
 
         BASE = get_base_url()
         self.api_history = f"{BASE}/history/private"
 
-        # ---------------- UI SETUP ----------------
         self.setWindowTitle(f"Chat with {receiver}")
         self.resize(500, 500)
 
@@ -51,18 +45,13 @@ class ChatWindow(QWidget):
 
         self.send_btn.clicked.connect(self.send_message)
 
-        # --- Load chat history ---
         self.load_history()
 
-    # ---------------------------------------------------------
-    # TIME HELPER
-    # ---------------------------------------------------------
+
     def now(self):
         return time.strftime("%Y-%m-%d %H:%M:%S")
 
-    # ---------------------------------------------------------
-    # LOAD CHAT HISTORY FROM BACKEND
-    # ---------------------------------------------------------
+
     def load_history(self):
         token = self.user_data["token"]
         params = {
@@ -94,16 +83,12 @@ class ChatWindow(QWidget):
         except Exception as e:
             self.chat_display.append(f"[{self.now()}] ⚠ Failed to load history: {e}")
 
-    # ---------------------------------------------------------
-    # SHOW INCOMING MESSAGE (CALLED BY MAINWINDOW)
-    # ---------------------------------------------------------
+
     def display_incoming(self, sender, text, ts):
-        """This is called ONLY by MainWindow when WS receives message"""
+
         self.chat_display.append(f"🟩 {sender}: {text}")
 
-    # ---------------------------------------------------------
-    # SEND MESSAGE (THROUGH MAINWINDOW'S WS)
-    # ---------------------------------------------------------
+
     def send_message(self):
         text = self.input_box.text().strip()
         if not text:
@@ -111,7 +96,6 @@ class ChatWindow(QWidget):
 
         ts = self.now()
 
-        # show on screen instantly
         self.chat_display.append(f"🟦 You: {text}")
 
         payload = {
@@ -122,7 +106,6 @@ class ChatWindow(QWidget):
             "timestamp": ts
         }
 
-        # send via MainWindow
         self.send_callback(payload)
 
         self.input_box.clear()

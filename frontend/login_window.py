@@ -56,9 +56,7 @@ class LoginWindow(QWidget):
 
                 QMessageBox.information(self, "Success", "Login successful!")
 
-                # -------------------------
-                # LAZY IMPORT — fixes freeze / circular import
-                # -------------------------
+
                 from frontend.main_window import MainWindow
 
                 self.next = MainWindow(data)

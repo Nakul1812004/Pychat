@@ -20,9 +20,6 @@ from frontend.ai_chat_window import AIChatWindow
 from frontend.chat_window import ChatWindow
 
 
-# --------------------------------------------------------
-#  SINGLE PERSISTENT WEBSOCKET THREAD
-# --------------------------------------------------------
 class MainWSReceiver(QThread):
     signal = Signal(dict)
     connected = Signal()
@@ -70,7 +67,6 @@ class MainWSReceiver(QThread):
             await asyncio.sleep(backoff)
             backoff = min(backoff * 2, 20)
 
-    # Send outgoing message
     def send_ws(self, data: dict):
         if self.ws and self.loop:
             asyncio.run_coroutine_threadsafe(
@@ -87,9 +83,6 @@ class MainWSReceiver(QThread):
             pass
 
 
-# --------------------------------------------------------
-#  MAIN APP WINDOW
-# --------------------------------------------------------
 class MainWindow(QMainWindow):
     def __init__(self, user_data):
         super().__init__()
@@ -105,12 +98,9 @@ class MainWindow(QMainWindow):
 
         self.api_users = f"{self.API_BASE}/users"
 
-        # ----------------------------------------------------
-        # LEFT PANEL (Notifications + Profile Image)
-        # ----------------------------------------------------
         left_panel = QVBoxLayout()
 
-        # Load image safely
+
         base_path = os.path.dirname(__file__)
         img_path = os.path.join(base_path, "assets", "logo.png")
         logo = QLabel()
@@ -126,14 +116,9 @@ class MainWindow(QMainWindow):
         left_panel.addWidget(self.notifications_label)
         left_panel.addWidget(self.notifications_list, 60)
 
-        # ----------------------------------------------------
-        # CENTER PANEL (Chat Windows)
-        # ----------------------------------------------------
+
         self.middle_panel = QStackedLayout()
 
-        # ----------------------------------------------------
-        # RIGHT PANEL (Friends List)
-        # ----------------------------------------------------
         right_panel = QVBoxLayout()
 
         self.friends_label = QLabel("👥 Friends")
@@ -143,7 +128,6 @@ class MainWindow(QMainWindow):
         right_panel.addWidget(self.friends_label)
         right_panel.addWidget(self.friends_list, 80)
 
-        # Buttons
         btn_row = QHBoxLayout()
 
         btn_add = QPushButton("➕ Add Friend")
@@ -159,9 +143,6 @@ class MainWindow(QMainWindow):
 
         right_panel.addLayout(btn_row)
 
-        # ----------------------------------------------------
-        # MIDDLE CONTAINER
-        # ----------------------------------------------------
         main_layout = QHBoxLayout()
         main_layout.addLayout(left_panel, 3)
         main_layout.addLayout(self.middle_panel, 6)
@@ -171,13 +152,10 @@ class MainWindow(QMainWindow):
         container.setLayout(main_layout)
         self.setCentralWidget(container)
 
-        # Load initial lists
         self.load_notifications()
         self.load_friends()
 
-        # ----------------------------------------------------
-        # WebSocket Connection
-        # ----------------------------------------------------
+
         token = user_data["token"]
         username = user_data["username"]
 
@@ -189,13 +167,9 @@ class MainWindow(QMainWindow):
         self.ws_thread.error.connect(lambda e: print("WS Error:", e))
         self.ws_thread.start()
 
-        # For AI chat
         self.ai_window = AIChatWindow(user_data)
         self.middle_panel.addWidget(self.ai_window)
 
-    # --------------------------------------------------------
-    # REQUEST HELPERS
-    # --------------------------------------------------------
     def load_notifications(self):
         self.notifications_list.clear()
         token = self.user_data["token"]
@@ -221,9 +195,6 @@ class MainWindow(QMainWindow):
         except Exception as e:
             self.friends_list.addItem(f"⚠ {e}")
 
-    # --------------------------------------------------------
-    # FRIEND SELECTED → OPEN CHAT WINDOW
-    # --------------------------------------------------------
     def handle_friend_click(self, item):
         friend = item.text()
 
@@ -235,9 +206,6 @@ class MainWindow(QMainWindow):
 
         self.middle_panel.setCurrentWidget(self.chat_windows[friend])
 
-    # --------------------------------------------------------
-    # NOTIFICATION -> ACCEPT FRIEND
-    # --------------------------------------------------------
     def handle_notification_click(self, item):
         txt = item.text()
         if "Friend request from" in txt:
@@ -263,9 +231,6 @@ class MainWindow(QMainWindow):
         except Exception as e:
             QMessageBox.warning(self, "Error", str(e))
 
-    # --------------------------------------------------------
-    # ADD FRIEND
-    # --------------------------------------------------------
     def add_friend(self):
         ref, ok = QInputDialog.getText(self, "Referral", "Enter referral ID:")
         if ok and ref:
@@ -279,15 +244,10 @@ class MainWindow(QMainWindow):
             except Exception as e:
                 QMessageBox.warning(self, "Error", str(e))
 
-    # --------------------------------------------------------
-    # AI CHAT
-    # --------------------------------------------------------
+
     def open_ai_chat(self):
         self.middle_panel.setCurrentWidget(self.ai_window)
 
-    # --------------------------------------------------------
-    # REALTIME MESSAGES FROM WS
-    # --------------------------------------------------------
     def handle_realtime_event(self, data):
         try:
             t = data.get("type")
@@ -304,7 +264,7 @@ class MainWindow(QMainWindow):
                 text = data["message"]
                 ts = data.get("timestamp", time.strftime("%H:%M:%S"))
 
-                # If chat window open -> display inside
+
                 if sender in self.chat_windows:
                     self.chat_windows[sender].display_incoming(sender, text, ts)
                 else:
@@ -323,16 +283,11 @@ class MainWindow(QMainWindow):
             print("Realtime handler error:", e)
             traceback.print_exc()
 
-    # --------------------------------------------------------
-    # RELOAD ALL LISTS
-    # --------------------------------------------------------
     def reload_friend_list(self):
         self.load_friends()
         self.load_notifications()
 
-    # --------------------------------------------------------
-    # CLEAN EXIT
-    # --------------------------------------------------------
+
     def closeEvent(self, e):
         try:
             self.ws_thread.stop()

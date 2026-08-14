@@ -15,9 +15,7 @@ client = None
 db = None
 
 
-# -----------------------------------------
-# CONNECT TO MONGO
-# -----------------------------------------
+
 async def connect_to_mongo(retries: int = 5, delay: int = 3):
     global client, db
 
@@ -25,7 +23,7 @@ async def connect_to_mongo(retries: int = 5, delay: int = 3):
         print("❌ ERROR: MONGO_URI missing in backend/.env")
         sys.exit(1)
 
-    print(f"🧩 Connecting to MongoDB → {DB_NAME}")
+    print(f"Connecting to MongoDB → {DB_NAME}")
 
     for attempt in range(1, retries + 1):
         try:
@@ -39,7 +37,7 @@ async def connect_to_mongo(retries: int = 5, delay: int = 3):
             return
 
         except Exception as e:
-            print(f"⚠️ attempt {attempt}/{retries} failed: {e}")
+            print(f"attempt {attempt}/{retries} failed: {e}")
             if attempt < retries:
                 await asyncio.sleep(delay)
 
@@ -47,9 +45,7 @@ async def connect_to_mongo(retries: int = 5, delay: int = 3):
     sys.exit(1)
 
 
-# -----------------------------------------
-# CLOSE MONGO
-# -----------------------------------------
+
 async def close_mongo_connection():
     global client
     if client:
@@ -57,9 +53,6 @@ async def close_mongo_connection():
         print("🔒 MongoDB closed.")
 
 
-# -----------------------------------------
-# GET DB — used everywhere
-# -----------------------------------------
 async def get_db():
     global db
     if db is None:

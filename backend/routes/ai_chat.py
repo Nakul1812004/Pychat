@@ -9,7 +9,7 @@ from backend.models import ChatRequest
 
 load_dotenv("D:/Chat bot/backend/.env")
 
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+GROQ_API_KEY = os.getenv("GROK_API_KEY")
 
 ai_router = APIRouter()
 
@@ -37,9 +37,6 @@ async def query_groq_api(model: str, prompt: str) -> str:
     return r.json()["choices"][0]["message"]["content"]
 
 
-# ------------------------------------------------
-#  SAVE AI CHAT MESSAGE TO DATABASE
-# ------------------------------------------------
 async def save_ai_message(db, user: str, role: str, message: str):
     await db.ai_messages.insert_one({
         "user": user,
@@ -49,9 +46,6 @@ async def save_ai_message(db, user: str, role: str, message: str):
     })
 
 
-# ------------------------------------------------
-#  LOAD AI CHAT HISTORY
-# ------------------------------------------------
 @ai_router.get("/history")
 async def get_ai_history(username: str, db=Depends(get_db)):
     msgs = await db.ai_messages.find({"user": username}).sort("timestamp", 1).to_list(500)
@@ -67,15 +61,12 @@ async def get_ai_history(username: str, db=Depends(get_db)):
     return formatted
 
 
-# ------------------------------------------------
-#  MAIN AI CHAT ENDPOINT
-# ------------------------------------------------
 @ai_router.post("/chat")
 async def chat(request: ChatRequest, db=Depends(get_db)):
-    # Generate model reply
+
     reply = await query_groq_api(request.model, request.message)
 
-    # Save both prompt + reply
+
     await save_ai_message(db, request.username, "user", request.message)
     await save_ai_message(db, request.username, "assistant", reply)
 
